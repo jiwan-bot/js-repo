@@ -1,0 +1,242 @@
+<!DOCTYPE html>
+<html>
+<head>
+<title>Classic Chess</title>
+
+<style>
+body {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 100vh;
+    background: #111;
+    font-family: Arial, sans-serif;
+    color: white;
+}
+
+.board {
+    display: grid;
+    grid-template-columns: repeat(8, 75px);
+    grid-template-rows: repeat(8, 75px);
+    border: 4px solid white;
+}
+
+.square {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    font-size: 44px;
+    cursor: pointer;
+}
+
+.white { background: #ffffff; color: black; }
+.black { background: #000000; color: white; }
+
+.selected {
+    outline: 3px solid red;
+}
+
+#status {
+    position: absolute;
+    top: 20px;
+    font-size: 18px;
+}
+</style>
+</head>
+
+<body>
+
+<div id="status">White's Turn</div>
+<div class="board" id="board"></div>
+
+<script>
+
+const boardEl = document.getElementById("board");
+const statusEl = document.getElementById("status");
+
+let currentPlayer = "white";
+let selected = null;
+
+let hasMoved = {
+    whiteKing:false,
+    blackKing:false,
+    whiteRookLeft:false,
+    whiteRookRight:false,
+    blackRookLeft:false,
+    blackRookRight:false
+};
+
+const pieces = {
+    r:"♜", n:"♞", b:"♝", q:"♛", k:"♚", p:"♟",
+    R:"♖", N:"♘", B:"♗", Q:"♕", K:"♔", P:"♙"
+};
+
+let board = [
+["r","n","b","q","k","b","n","r"],
+["p","p","p","p","p","p","p","p"],
+["","","","","","","",""],
+["","","","","","","",""],
+["","","","","","","",""],
+["","","","","","","",""],
+["P","P","P","P","P","P","P","P"],
+["R","N","B","Q","K","B","N","R"]
+];
+
+function drawBoard(){
+    boardEl.innerHTML="";
+    for(let r=0;r<8;r++){
+        for(let c=0;c<8;c++){
+            let sq=document.createElement("div");
+            sq.className="square "+((r+c)%2?"black":"white");
+            sq.dataset.r=r;
+            sq.dataset.c=c;
+
+            if(board[r][c])
+                sq.textContent=pieces[board[r][c]];
+
+            sq.onclick=()=>clickSquare(r,c);
+            boardEl.appendChild(sq);
+        }
+    }
+}
+
+function clickSquare(r,c){
+    let piece=board[r][c];
+
+    if(selected){
+        let [sr,sc]=selected;
+
+        if(isValidMove(sr,sc,r,c)){
+            makeMove(sr,sc,r,c);
+            if(isKingInCheck(currentPlayer)){
+                undoMove(sr,sc,r,c);
+                alert("Illegal move! King in check.");
+            }else{
+                currentPlayer=currentPlayer==="white"?"black":"white";
+                statusEl.textContent=currentPlayer+"'s Turn";
+            }
+        }
+        selected=null;
+        drawBoard();
+    }
+    else if(piece && isCurrentPlayerPiece(piece)){
+        selected=[r,c];
+        highlight(r,c);
+    }
+}
+
+function isCurrentPlayerPiece(piece){
+    return (currentPlayer==="white" && piece===piece.toUpperCase()) ||
+           (currentPlayer==="black" && piece===piece.toLowerCase());
+}
+
+function pathClear(sr,sc,tr,tc){
+    let dr=Math.sign(tr-sr);
+    let dc=Math.sign(tc-sc);
+    let r=sr+dr;
+    let c=sc+dc;
+
+    while(r!==tr || c!==tc){
+        if(board[r][c]!== "") return false;
+        r+=dr;
+        c+=dc;
+    }
+    return true;
+}
+
+function isValidMove(sr,sc,tr,tc){
+    let piece=board[sr][sc];
+    let target=board[tr][tc];
+    if(target && isCurrentPlayerPiece(target)) return false;
+
+    let dr=tr-sr;
+    let dc=tc-sc;
+
+    switch(piece.toLowerCase()){
+
+        case "p":
+            let dir=piece==="P"?-1:1;
+            if(dc===0 && dr===dir && !target) return true;
+            if(Math.abs(dc)===1 && dr===dir && target) return true;
+            return false;
+
+        case "r":
+            return (sr===tr||sc===tc)&&pathClear(sr,sc,tr,tc);
+
+        case "b":
+            return Math.abs(dr)===Math.abs(dc)&&pathClear(sr,sc,tr,tc);
+
+        case "q":
+            return ((sr===tr||sc===tc)||Math.abs(dr)===Math.abs(dc))
+                   && pathClear(sr,sc,tr,tc);
+
+        case "n":
+            return Math.abs(dr)*Math.abs(dc)===2;
+
+        case "k":
+            if(Math.abs(dr)<=1 && Math.abs(dc)<=1) return true;
+
+            // Castling
+            if(piece==="K" && !hasMoved.whiteKing){
+                if(tc===6 && !hasMoved.whiteRookRight
+                   && pathClear(sr,sc,sr,7)) return true;
+                if(tc===2 && !hasMoved.whiteRookLeft
+                   && pathClear(sr,sc,sr,0)) return true;
+            }
+            if(piece==="k" && !hasMoved.blackKing){
+                if(tc===6 && !hasMoved.blackRookRight
+                   && pathClear(sr,sc,sr,7)) return true;
+                if(tc===2 && !hasMoved.blackRookLeft
+                   && pathClear(sr,sc,sr,0)) return true;
+            }
+            return false;
+    }
+    return false;
+}
+
+function makeMove(sr,sc,tr,tc){
+    let piece=board[sr][sc];
+    board[tr][tc]=piece;
+    board[sr][sc]="";
+
+    if(piece==="K") hasMoved.whiteKing=true;
+    if(piece==="k") hasMoved.blackKing=true;
+}
+
+function undoMove(sr,sc,tr,tc){
+    board[sr][sc]=board[tr][tc];
+    board[tr][tc]="";
+}
+
+function isKingInCheck(player){
+    let king=player==="white"?"K":"k";
+    let kr,kc;
+
+    for(let r=0;r<8;r++){
+        for(let c=0;c<8;c++){
+            if(board[r][c]===king){ kr=r; kc=c; }
+        }
+    }
+
+    for(let r=0;r<8;r++){
+        for(let c=0;c<8;c++){
+            let piece=board[r][c];
+            if(piece && !isCurrentPlayerPiece(piece)){
+                if(isValidMove(r,c,kr,kc))
+                    return true;
+            }
+        }
+    }
+    return false;
+}
+
+function highlight(r,c){
+    drawBoard();
+    boardEl.children[r*8+c].classList.add("selected");
+}
+
+drawBoard();
+
+</script>
+</body>
+</html>

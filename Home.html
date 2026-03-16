@@ -1,0 +1,37 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Student Grade Calculator</title>
+    <link rel="stylesheet" href="body.css">
+</head>
+<body>
+
+<div class="container">
+    <h2>Student Grade Calculator</h2>
+    <p>Enter your marks to calculate your grade</p>
+
+    <input type="number" id="obtained" placeholder="Enter obtained marks">
+    <input type="number" id="max" placeholder="Enter maximum marks">
+
+    <div class="btn-row">
+        <button class="calc-btn" onclick="calculateGrade()">Calculate Grade</button>
+        <button class="reset-btn" onclick="resetForm()">Reset</button>
+    </div>
+
+    <div id="infoBox" class="scale-box">
+        <h3>Grading Scale</h3>
+        <p>A+: 90% – 100%</p>
+        <p>A: 80% – 89%</p>
+        <p>B+: 70% – 79%</p>
+        <p>B: 60% – 69%</p>
+        <p>C: 50% – 59%</p>
+        <p>D: 40% – 49%</p>
+        <p>Fail: Below 40%</p>
+    </div>
+</div>
+
+<script src="javaScript.js"></script>
+</body>
+</html>

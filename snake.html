@@ -1,0 +1,146 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Snakes and Ladders</title>
+    <style>
+        body {
+            font-family: Arial;
+            text-align: center;
+            background-color: #f4f4f4;
+        }
+
+        h1 {
+            margin-top: 20px;
+        }
+
+        .board {
+            width: 500px;
+            height: 500px;
+            margin: 20px auto;
+            display: grid;
+            grid-template-columns: repeat(10, 1fr);
+            border: 3px solid black;
+        }
+
+        .cell {
+            border: 1px solid gray;
+            display: flex;
+            align-items: flex-end;
+            justify-content: flex-start;
+            font-size: 12px;
+            padding: 3px;
+            position: relative;
+        }
+
+        .player {
+            width: 20px;
+            height: 20px;
+            background-color: red;
+            border-radius: 50%;
+            position: absolute;
+            top: 5px;
+            right: 5px;
+        }
+
+        button {
+            padding: 10px 20px;
+            font-size: 16px;
+            cursor: pointer;
+        }
+    </style>
+</head>
+<body>
+
+<h1>🐍 Snakes and Ladders 🎲</h1>
+
+<div class="board" id="board"></div>
+
+<button onclick="rollDice()">Roll Dice</button>
+<p id="status">Click Roll Dice to start</p>
+
+<script>
+const board = document.getElementById("board");
+const statusText = document.getElementById("status");
+
+let playerPosition = 1;
+
+// Snakes and Ladders positions
+const snakes = {
+    16: 6,
+    47: 26,
+    49: 11,
+    56: 53,
+    62: 19,
+    64: 60,
+    87: 24,
+    93: 73,
+    95: 75,
+    98: 78
+};
+
+const ladders = {
+    2: 38,
+    7: 14,
+    8: 31,
+    15: 26,
+    21: 42,
+    28: 84,
+    36: 44,
+    51: 67,
+    71: 91,
+    78: 98
+};
+
+// Create board
+for (let i = 100; i >= 1; i--) {
+    const cell = document.createElement("div");
+    cell.classList.add("cell");
+    cell.id = "cell-" + i;
+    cell.innerText = i;
+    board.appendChild(cell);
+}
+
+function updatePlayer() {
+    document.querySelectorAll(".player").forEach(p => p.remove());
+
+    const player = document.createElement("div");
+    player.classList.add("player");
+
+    const currentCell = document.getElementById("cell-" + playerPosition);
+    currentCell.appendChild(player);
+}
+
+function rollDice() {
+    let dice = Math.floor(Math.random() * 6) + 1;
+    statusText.innerText = "You rolled: " + dice;
+
+    if (playerPosition + dice <= 100) {
+        playerPosition += dice;
+    }
+
+    if (snakes[playerPosition]) {
+        statusText.innerText += " 🐍 Snake! Down to " + snakes[playerPosition];
+        playerPosition = snakes[playerPosition];
+    }
+
+    // Check for ladder
+    if (ladders[playerPosition]) {
+        statusText.innerText += " 🪜 Ladder! Up to " + ladders[playerPosition];
+        playerPosition = ladders[playerPosition];
+    }
+
+    if (playerPosition === 100) {
+        statusText.innerText = "🎉 You Won!";
+        alert("Congratulations! You reached 100!");
+        playerPosition = 1;
+    }
+
+    updatePlayer();
+}
+
+// Initial position
+updatePlayer();
+</script>
+
+</body>
+</html>

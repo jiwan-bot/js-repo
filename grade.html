@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Student Grade Calculator</title>
+<link rel="stylesheet" href="style.css">
+</head>
+
+<body>
+
+<div class="container">
+
+<h1>Student Grade Calculator</h1>
+<p>Enter marks for 5 subjects</p>
+
+<input type="number" id="hindi" placeholder="Hindi Marks">
+<input type="number" id="english" placeholder="English Marks">
+<input type="number" id="math" placeholder="Math Marks">
+<input type="number" id="physics" placeholder="Physics Marks">
+<input type="number" id="computer" placeholder="Computer Marks">
+
+<div class="buttons">
+<button onclick="calculateGrade()">Calculate</button>
+<button onclick="resetForm()">Reset</button>
+</div>
+
+<div id="resultBox"></div>
+
+<div class="grade-scale">
+<h3>Grading Scale</h3>
+<p>A+ : 90 – 100</p>
+<p>A : 80 – 89</p>
+<p>B+ : 70 – 79</p>
+<p>B : 60 – 69</p>
+<p>C : 50 – 59</p>
+<p>D : 40 – 49</p>
+<p>Fail : Below 40</p>
+</div>
+
+</div>
+
+<script src="script.js"></script>
+
+</body>
+</html>
